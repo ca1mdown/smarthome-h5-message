@@ -1,0 +1,5 @@
+{
+  "name": "Message Notification Center",
+  "description": "A high-fidelity message notification and settings center inspired by mobile UI designs, featuring push settings, activity logs, and system messages.",
+  "requestFramePermissions": []
+}
