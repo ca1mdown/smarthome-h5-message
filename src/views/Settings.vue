@@ -17,6 +17,7 @@ const showAlert = ref(false);
 const showTimePicker = ref(false);
 const timePickerType = ref('Starts');
 const initialTime = ref('23:49');
+const showSettingsTab = ref(true);
 
 const togglePush = () => {
   if (!pushEnabled.value) {
@@ -63,7 +64,7 @@ const useDemoIcons = true;
       </div>
       <div class="header-title">Message Notification</div>
     </div>
-    <div class="tabs">
+    <div v-if="showSettingsTab" class="tabs">
       <div class="tab-item" @click="router.push('/center')">Message Center</div>
       <div class="tab-item active">Message Settings</div>
     </div>
@@ -114,7 +115,7 @@ const useDemoIcons = true;
           <div class="card-item">
             <div class="card-item-left">
               <div class="card-item-title">Marketing Messages</div>
-              <div class="card-item-desc">Receive marketing campaign</div>
+              <div class="card-item-desc">Receive system notifications</div>
             </div>
             <div :class="['switch', { active: marketing }]" @click="marketing = !marketing">
               <div class="switch-handle" />

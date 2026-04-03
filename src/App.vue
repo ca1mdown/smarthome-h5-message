@@ -14,7 +14,7 @@
 :root {
   --primary: #00A9A5;
   --primary-light: rgba(0, 169, 165, 0.1);
-  --bg-gray: #F7F8FA;
+  --bg-gray: #f5f6f7;
   --text-dark: #1A1A1A;
   --text-medium: #666666;
   --text-light: #999999;
@@ -37,6 +37,11 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 14px;
   line-height: 1.5;
+  min-height: 100vh;
+  /* Support for safe areas */
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 </style>
 
@@ -45,6 +50,7 @@ body {
   max-width: 375px;
   margin: 0 auto;
   min-height: 100vh;
+  min-height: -webkit-fill-available;
   background-color: var(--bg-gray);
   position: relative;
   display: flex;

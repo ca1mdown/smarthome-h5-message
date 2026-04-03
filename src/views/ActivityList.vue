@@ -60,12 +60,14 @@ const useDemoIcons = true;
 
 .header {
   padding: 12px 16px;
+  padding-top: calc(12px + env(safe-area-inset-top, 0px));
   display: flex;
   align-items: center;
   background: var(--bg-gray);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 100;
+  width: 100%;
 }
 
 .header-back {

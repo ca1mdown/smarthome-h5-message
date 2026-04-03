@@ -1,13 +1,21 @@
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { ChevronLeft, Settings, Trash2, CheckCircle, Bell, Check } from 'lucide-vue-next';
+import { ref, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { ChevronLeft, Settings, Trash2, CheckCircle, Bell, Check, ChevronRight } from 'lucide-vue-next';
 import DeleteModal from '../components/DeleteModal.vue';
 
 const router = useRouter();
+const route = useRoute();
 const isEditing = ref(false);
 const selectedMessages = ref([0]);
 const showDeleteModal = ref(false);
+const pageTitle = ref('Marketing Messages');
+
+onMounted(() => {
+  if (route.query.title) {
+    pageTitle.value = route.query.title;
+  }
+});
 const messages = ref([
   { id: 0, title: "Account login elsewhere", desc: "Your account was logged in...", time: "10:32", unread: true },
   { id: 1, title: "Account login elsewhere", desc: "Your account was logged in...", time: "2024-06-14", unread: false },
@@ -36,6 +44,17 @@ const deleteSelected = () => {
   isEditing.value = false;
 };
 
+const markAsRead = () => {
+  messages.value = messages.value.map(m => {
+    if (selectedMessages.value.includes(m.id)) {
+      return { ...m, unread: false };
+    }
+    return m;
+  });
+  selectedMessages.value = [];
+  isEditing.value = false;
+};
+
 const placeholderIcon = 'https://picsum.photos/seed/placeholder/24/24?grayscale';
 
 // Set to false to use your custom images
@@ -49,15 +68,15 @@ const useDemoIcons = true;
         <ChevronLeft v-if="useDemoIcons" :size="24" />
         <img v-else :src="placeholderIcon" style="width: 24px; height: 24px;" />
       </div>
-      <div class="header-title">Message center</div>
+      <div class="header-title">{{ pageTitle }}</div>
       <div class="header-right">
-        <Settings v-if="useDemoIcons" :size="22" @click="router.push('/notification')" />
-        <img v-else :src="placeholderIcon" style="width: 22px; height: 22px;" @click="router.push('/notification')" />
+        <Settings v-if="useDemoIcons" :size="22" @click="router.push({ path: '/notification', query: { tab: 'settings' } })" />
+        <img v-else :src="placeholderIcon" style="width: 22px; height: 22px;" @click="router.push({ path: '/notification', query: { tab: 'settings' } })" />
       </div>
     </div>
     <div class="content" :style="{ padding: 0, paddingBottom: isEditing ? '120px' : '0' }">
       <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center">
-        <div style="font-size: 18px; font-weight: 600">System Messages</div>
+        <div class="system-messages-title">{{ pageTitle }}</div>
         <div style="display: flex; align-items: center; gap: 12px; color: #999">
           <div v-if="isEditing" style="display: flex; align-items: center; gap: 8px; cursor: pointer" @click="selectAll">
             Select all 
@@ -73,7 +92,7 @@ const useDemoIcons = true;
         </div>
       </div>
       <div v-if="messages.length > 0" class="card" style="margin: 0 16px; border-radius: 20px">
-        <div v-for="msg in messages" :key="msg.id" class="system-msg-item" @click="isEditing ? toggleSelect(msg.id) : null">
+        <div v-for="msg in messages" :key="msg.id" class="system-msg-item" @click="isEditing ? toggleSelect(msg.id) : router.push('/detail')">
           <div class="system-msg-icon">
             <Bell v-if="useDemoIcons" :size="20" color="#00D1FF" />
             <img v-else :src="placeholderIcon" style="width: 20px; height: 20px;" />
@@ -81,15 +100,18 @@ const useDemoIcons = true;
           <div class="system-msg-content">
             <div class="system-msg-header">
               <div class="system-msg-title">{{ msg.title }}</div>
-              <div v-if="msg.unread" class="system-msg-dot" />
             </div>
             <div class="system-msg-desc">{{ msg.desc }}</div>
             <div class="system-msg-time">{{ msg.time }}</div>
           </div>
-          <div v-if="isEditing" style="align-self: center; margin-left: 8px">
-            <div :class="['checkbox', { checked: selectedMessages.includes(msg.id) }]">
-              <Check v-if="useDemoIcons" :size="14" color="white" />
-              <img v-else :src="placeholderIcon" style="width: 14px; height: 14px;" />
+          <div class="system-msg-right">
+            <div v-if="msg.unread && isEditing" class="system-msg-dot edit-mode" />
+            <div class="checkbox-slot">
+              <div v-if="isEditing" :class="['checkbox', { checked: selectedMessages.includes(msg.id) }]">
+                <Check v-if="useDemoIcons" :size="14" color="white" />
+                <img v-else :src="placeholderIcon" style="width: 14px; height: 14px;" />
+              </div>
+              <div v-else-if="msg.unread" class="system-msg-dot" />
             </div>
           </div>
         </div>
@@ -103,14 +125,14 @@ const useDemoIcons = true;
         <div class="no-message-text">No message</div>
       </div>
 
-      <div v-if="isEditing" style="position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #EEE; display: flex; flex-direction: column; z-index: 100">
+      <div v-if="isEditing" style="position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #EEE; display: flex; flex-direction: column; z-index: 100; padding-bottom: env(safe-area-inset-bottom, 0px)">
         <div style="display: flex; justify-content: space-around; padding: 12px 16px">
           <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer" @click="showDelete">
             <Trash2 v-if="useDemoIcons" :size="20" />
             <img v-else :src="placeholderIcon" style="width: 20px; height: 20px;" />
             <span style="font-size: 12px">Delete</span>
           </div>
-          <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer" @click="markAsRead">
             <CheckCircle v-if="useDemoIcons" :size="20" />
             <img v-else :src="placeholderIcon" style="width: 20px; height: 20px;" />
             <span style="font-size: 12px">Read</span>
@@ -135,12 +157,14 @@ const useDemoIcons = true;
 
 .header {
   padding: 12px 16px;
+  padding-top: calc(12px + env(safe-area-inset-top, 0px));
   display: flex;
   align-items: center;
   background: var(--bg-gray);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 100;
+  width: 100%;
 }
 
 .header-back {
@@ -172,6 +196,13 @@ const useDemoIcons = true;
   padding: 16px;
   display: flex;
   flex-direction: column;
+}
+
+.system-messages-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #333;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 .card {
@@ -208,6 +239,7 @@ const useDemoIcons = true;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  position: relative;
 }
 
 .system-msg-content {
@@ -217,6 +249,7 @@ const useDemoIcons = true;
 .system-msg-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 4px;
 }
 
@@ -225,11 +258,32 @@ const useDemoIcons = true;
   font-weight: 500;
 }
 
+.system-msg-right {
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.checkbox-slot {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
 .system-msg-dot {
   width: 8px;
   height: 8px;
   background: var(--danger);
   border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.system-msg-dot.edit-mode {
+  margin-right: 12px;
 }
 
 .system-msg-desc {

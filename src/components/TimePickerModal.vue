@@ -62,6 +62,7 @@ const onConfirmTime = () => {
   width: 100%;
   max-width: 375px;
   border-radius: 20px 20px 0 0;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .modal-header {

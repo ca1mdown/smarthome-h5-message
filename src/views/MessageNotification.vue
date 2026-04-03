@@ -1,12 +1,20 @@
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { ChevronLeft, ChevronRight, Megaphone, Flag, MessageSquare, Lightbulb } from 'lucide-vue-next';
+import { ref, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { ChevronLeft, ChevronRight, Megaphone, Flag, MessageSquare, Lightbulb, Bell } from 'lucide-vue-next';
 import AlertModal from '../components/AlertModal.vue';
 import TimePickerModal from '../components/TimePickerModal.vue';
 
 const router = useRouter();
+const route = useRoute();
 const activeTab = ref('center'); // 'center' or 'settings'
+const showSettingsTab = ref(true); // Toggle to show/hide the settings tab
+
+onMounted(() => {
+  if (route.query.tab === 'settings') {
+    activeTab.value = 'settings';
+  }
+});
 
 // Settings State
 const pushEnabled = ref(true);
@@ -53,6 +61,12 @@ const downloadApp = () => {
 
 const placeholderIcon = 'https://picsum.photos/seed/placeholder/24/24?grayscale';
 const useDemoIcons = true;
+
+const unreadCounts = ref({
+  system: 38,
+  activity: 5,
+  interactive: 12
+});
 </script>
 
 <template>
@@ -64,7 +78,7 @@ const useDemoIcons = true;
       </div>
       <div class="header-title">Message Notification</div>
     </div>
-    <div class="tabs">
+    <div v-if="showSettingsTab" class="tabs">
       <div :class="['tab-item', { active: activeTab === 'center' }]" @click="activeTab = 'center'">Message Center</div>
       <div :class="['tab-item', { active: activeTab === 'settings' }]" @click="activeTab = 'settings'">Message Settings</div>
     </div>
@@ -73,14 +87,15 @@ const useDemoIcons = true;
       <!-- Message Center Content -->
       <div v-if="activeTab === 'center'">
         <div class="category-list">
-          <div class="category-item" @click="router.push('/system')">
+          <div class="category-item" @click="router.push({ path: '/system', query: { title: 'Marketing Messages' } })">
             <div class="category-icon-wrapper" :style="{ background: useDemoIcons ? '#00D1FF' : 'transparent' }">
-              <Megaphone v-if="useDemoIcons" :size="20" />
-              <img v-else :src="'/megaphone.png'" style="width: 40px; height: 40px;" />
+              <Bell v-if="useDemoIcons" :size="20" />
+              <img v-else :src="'/bell.png'" style="width: 40px; height: 40px;" />
             </div>
             <div class="category-info">
               <div class="category-name">Marketing Messages</div>
             </div>
+            <div v-if="unreadCounts.system > 0" class="unread-badge">{{ unreadCounts.system }}</div>
             <ChevronRight v-if="useDemoIcons" :size="20" color="#CCC" />
             <img v-else :src="'/chevron-right.png'" style="width: 20px; height: 20px;" />
           </div>
@@ -92,10 +107,11 @@ const useDemoIcons = true;
             <div class="category-info">
               <div class="category-name">Activity Notification</div>
             </div>
+            <div v-if="unreadCounts.activity > 0" class="unread-badge">{{ unreadCounts.activity }}</div>
             <ChevronRight v-if="useDemoIcons" :size="20" color="#CCC" />
             <img v-else :src="'/chevron-right.png'" style="width: 20px; height: 20px;" />
           </div>
-          <div class="category-item" @click="router.push('/system')">
+          <div class="category-item" @click="router.push({ path: '/system', query: { title: 'Interactive Message' } })">
             <div class="category-icon-wrapper" :style="{ background: useDemoIcons ? '#00A9A5' : 'transparent' }">
               <MessageSquare v-if="useDemoIcons" :size="20" />
               <img v-else :src="'/message-square.png'" style="width: 40px; height: 40px;" />
@@ -103,6 +119,7 @@ const useDemoIcons = true;
             <div class="category-info">
               <div class="category-name">Interactive Message</div>
             </div>
+            <div v-if="unreadCounts.interactive > 0" class="unread-badge">{{ unreadCounts.interactive }}</div>
             <ChevronRight v-if="useDemoIcons" :size="20" color="#CCC" />
             <img v-else :src="'/chevron-right.png'" style="width: 20px; height: 20px;" />
           </div>
@@ -157,7 +174,7 @@ const useDemoIcons = true;
             <div class="card-item">
               <div class="card-item-left">
                 <div class="card-item-title">Marketing Messages</div>
-                <div class="card-item-desc">Receive marketing campaign</div>
+                <div class="card-item-desc">Receive system notifications</div>
               </div>
               <div :class="['switch', { active: marketing }]" @click="marketing = !marketing">
                 <div class="switch-handle" />
@@ -207,12 +224,14 @@ const useDemoIcons = true;
 
 .header {
   padding: 12px 16px;
+  padding-top: calc(12px + env(safe-area-inset-top, 0px));
   display: flex;
   align-items: center;
   background: var(--bg-gray);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 100;
+  width: 100%;
 }
 
 .header-back {
@@ -238,8 +257,9 @@ const useDemoIcons = true;
   padding: 8px 16px;
   background: var(--bg-gray);
   position: sticky;
-  top: 51px;
-  z-index: 9;
+  top: calc(51px + env(safe-area-inset-top, 0px));
+  z-index: 90;
+  width: 100%;
 }
 
 .tab-item {
@@ -317,6 +337,22 @@ const useDemoIcons = true;
 .category-name {
   font-size: 16px;
   font-weight: 500;
+}
+
+.unread-badge {
+  background: #FF5252;
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 0 6px;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 4px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
 .card {
