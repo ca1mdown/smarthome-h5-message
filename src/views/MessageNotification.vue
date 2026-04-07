@@ -403,14 +403,14 @@ onMounted(() => {
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Common Bottom Tip -->
-      <div class="bottom-tip">
-        <Lightbulb v-if="useDemoIcons" :size="20" class="tip-icon" />
-        <img v-else src="https://picsum.photos/seed/placeholder/20/20?grayscale" style="width: 20px; height: 20px;" class="tip-icon" />
-        <div class="tip-text">
-          Click <span class="tip-link" @click="downloadApp">"Download App"</span> for faster and more stable message push notifications.
-        </div>
+    <!-- Common Bottom Tip -->
+    <div class="bottom-tip">
+      <Lightbulb v-if="useDemoIcons" :size="20" class="tip-icon" />
+      <img v-else src="https://picsum.photos/seed/placeholder/20/20?grayscale" style="width: 20px; height: 20px;" class="tip-icon" />
+      <div class="tip-text">
+        Click <span class="tip-link" @click="downloadApp">"Download App"</span> for faster and more stable message push notifications.
       </div>
     </div>
 
@@ -430,7 +430,10 @@ onMounted(() => {
 .view-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
+  height: -webkit-fill-available;
+  overflow: hidden;
+  background: var(--bg-gray);
 }
 
 .header {
@@ -439,10 +442,9 @@ onMounted(() => {
   display: flex;
   align-items: center;
   background: var(--bg-gray);
-  position: sticky;
-  top: 0;
   z-index: 100;
   width: 100%;
+  flex-shrink: 0;
 }
 
 .header-back {
@@ -467,10 +469,9 @@ onMounted(() => {
   justify-content: space-around;
   padding: 8px 16px;
   background: var(--bg-gray);
-  position: sticky;
-  top: calc(51px + env(safe-area-inset-top, 0px));
   z-index: 90;
   width: 100%;
+  flex-shrink: 0;
 }
 
 .tab-item {
@@ -503,6 +504,7 @@ onMounted(() => {
   padding: 16px;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 .category-list {
@@ -675,14 +677,14 @@ onMounted(() => {
 }
 
 .bottom-tip {
-  margin-top: auto;
-  margin-bottom: 20px;
   padding: 16px;
+  margin: 0 16px 20px 16px;
   background: #E6F7F7;
   border-radius: 20px;
   display: flex;
   gap: 12px;
   align-items: flex-start;
+  flex-shrink: 0;
 }
 
 .tip-icon {

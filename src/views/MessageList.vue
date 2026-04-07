@@ -105,8 +105,11 @@ const fetchMessages = async (isLoadMore = false) => {
 
 const handleScroll = (e) => {
   const { scrollTop, scrollHeight, clientHeight } = e.target;
-  if (scrollTop + clientHeight >= scrollHeight - 20) {
-    fetchMessages(true);
+  // Increase threshold and use a more robust check for mobile browsers
+  if (scrollTop + clientHeight >= scrollHeight - 50) {
+    if (!isLoading.value && !isFinished.value) {
+      fetchMessages(true);
+    }
   }
 };
 
@@ -318,7 +321,9 @@ const useDemoIcons = true;
 .view-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
+  height: -webkit-fill-available;
+  overflow: hidden;
   background: var(--bg-gray);
 }
 
@@ -329,10 +334,9 @@ const useDemoIcons = true;
   align-items: center;
   justify-content: space-between;
   background: var(--bg-gray);
-  position: sticky;
-  top: 0;
   z-index: 100;
   width: 100%;
+  flex-shrink: 0;
 }
 
 .header-back {

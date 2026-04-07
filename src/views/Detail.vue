@@ -36,7 +36,10 @@ const useDemoIcons = true;
 .view-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
+  height: -webkit-fill-available;
+  overflow: hidden;
+  background: var(--bg-gray);
 }
 
 .header {
@@ -45,10 +48,9 @@ const useDemoIcons = true;
   display: flex;
   align-items: center;
   background: var(--bg-gray);
-  position: sticky;
-  top: 0;
   z-index: 100;
   width: 100%;
+  flex-shrink: 0;
 }
 
 .header-back {
@@ -73,6 +75,7 @@ const useDemoIcons = true;
   padding: 16px;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 .detail-view {
