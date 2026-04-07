@@ -35,7 +35,7 @@ const emit = defineEmits(['close', 'confirm']);
   background: rgba(0,0,0,0.4);
   display: flex;
   align-items: flex-end;
-  z-index: 1000;
+  z-index: 2000;
 }
 
 .modal-content {

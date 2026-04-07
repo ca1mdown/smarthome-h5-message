@@ -53,16 +53,27 @@ const onConfirmTime = () => {
   background: rgba(0,0,0,0.4);
   display: flex;
   align-items: flex-end;
-  justify-content: center;
-  z-index: 100;
+  z-index: 2000;
 }
 
 .modal-content {
   background: white;
   width: 100%;
-  max-width: 375px;
   border-radius: 20px 20px 0 0;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  animation: slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 .modal-header {
