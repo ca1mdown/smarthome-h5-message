@@ -1,7 +1,9 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { ChevronLeft, ChevronRight, Megaphone, Flag, MessageSquare, Lightbulb, Bell } from 'lucide-vue-next';
+import requestWrapper from '../utils/request';
+import { serviceTypes } from '../constants/serviceTypes';
 import AlertModal from '../components/AlertModal.vue';
 import TimePickerModal from '../components/TimePickerModal.vue';
 
@@ -18,17 +20,24 @@ onMounted(() => {
 
 // Settings State
 const pushEnabled = ref(true);
-const dndEnabled = ref(true);
-const marketing = ref(true);
+const dndEnabled = ref(false);
+const marketing = ref(false);
 const interactive = ref(false);
-const startTime = ref('23:49');
-const endTime = ref('06:20');
+const startTime = ref('00:00');
+const endTime = ref('06:00');
+const isToshiba = ref(false);
+const dataCenterUrl = ""; // To be supplemented by user
 
 // Modal State
 const showAlert = ref(false);
 const showTimePicker = ref(false);
 const timePickerType = ref('Starts');
-const initialTime = ref('23:49');
+const initialTime = ref('00:00');
+
+const isNextDay = computed(() => {
+  if (!startTime.value || !endTime.value) return false;
+  return endTime.value < startTime.value;
+});
 
 const togglePush = () => {
   if (!pushEnabled.value) {
@@ -51,6 +60,7 @@ const handleTimeSaved = (time) => {
     endTime.value = time;
   }
   showTimePicker.value = false;
+  saveMuteSettings();
 };
 
 const downloadApp = () => {
@@ -63,9 +73,212 @@ const placeholderIcon = 'https://picsum.photos/seed/placeholder/24/24?grayscale'
 const useDemoIcons = true;
 
 const unreadCounts = ref({
-  system: 38,
-  activity: 5,
-  interactive: 12
+  marketing: 0,
+  activity: 0,
+  interactive: 0
+});
+
+const fetchUnreadCounts = () => {
+  const params = {
+    appKey: "",
+    froms: "CCS-MKT,CCS-PROC,CCS-SVY",
+    homegroupIds: ""
+  };
+
+  requestWrapper({
+    url: "/mc/v5/app/messagecenter/froms/unreadCount",
+    method: "post",
+    params,
+  })
+    .then((res) => {
+      if (res.code === 0 && res.data) {
+        // Reset counts
+        unreadCounts.value.marketing = 0;
+        unreadCounts.value.activity = 0;
+        unreadCounts.value.interactive = 0;
+        
+        res.data.forEach(item => {
+          if (item.from === 'CCS-MKT') {
+            unreadCounts.value.marketing = item.count;
+          } else if (item.from === 'CCS-PROC') {
+            unreadCounts.value.activity = item.count;
+          } else if (item.from === 'CCS-SVY') {
+            unreadCounts.value.interactive = item.count;
+          }
+        });
+      }
+    })
+    .catch((error) => {
+      console.error('Failed to fetch unread counts:', error);
+    });
+};
+
+const fetchSettings = () => {
+  // 1. Fetch Mute settings
+  requestWrapper({
+    url: "/mc/v5/app/messagecenter/getMute",
+    method: "post",
+    params: {
+      appKey: ""
+    },
+  })
+    .then((res) => {
+      if (res.code === 0 && res.data) {
+        const data = res.data;
+        dndEnabled.value = data.muteFlag === 1;
+        
+        if (data.muteSetting && data.muteSetting.length > 0) {
+          const times = data.muteSetting[0].split(',');
+          if (times.length === 2) {
+            startTime.value = times[0];
+            endTime.value = times[1];
+          }
+        }
+      }
+    })
+    .catch((error) => {
+      console.error('Failed to fetch mute settings:', error);
+    });
+
+  // 2. Fetch Marketing and Interactive settings (Consent)
+  fetchConsentSettings();
+};
+
+const fetchConsentSettings = async () => {
+  try {
+    // Placeholder for userId, as bridge is not available in this context
+    const userId = "placeholder_user_id"; 
+    
+    const params = {
+      data: {
+        channelName: isToshiba.value ? 'TSmartLife' : 'MSmartHome',
+        uidEmailPhone: userId,
+        contactMethodList: [
+          'InApp_Permission',
+          'Interactive_Message_Permission',
+        ],
+      },
+    };
+
+    const res = await requestWrapper({
+      url: `${dataCenterUrl}/userCenterExternalApi/findUserConsent`,
+      method: "post",
+      params,
+    });
+
+    if (res.data && res.data.length) {
+      res.data.forEach(item => {
+        if (item.contactMethod === 'InApp_Permission') {
+          marketing.value =
+            item.consentMgmtList &&
+            item.consentMgmtList.length &&
+            item.consentMgmtList[0].consented === 1;
+        }
+        if (item.contactMethod === 'Interactive_Message_Permission') {
+          interactive.value =
+            item.consentMgmtList &&
+            item.consentMgmtList.length &&
+            item.consentMgmtList[0].consented === 1;
+        }
+      });
+    } else {
+      marketing.value = false;
+      interactive.value = false;
+    }
+  } catch (error) {
+    console.error('Failed to fetch consent settings:', error);
+    marketing.value = false;
+    interactive.value = false;
+  }
+};
+
+const saveMuteSettings = () => {
+  const params = {
+    muteFlag: dndEnabled.value ? 1 : 0,
+    muteSetting: [`${startTime.value},${endTime.value}`],
+  };
+
+  requestWrapper({
+    url: "/mc/v5/app/messagecenter/setMute",
+    method: "post",
+    params,
+  })
+    .then((res) => {
+      if (res.code === 0) {
+        console.log('Mute settings saved successfully');
+      }
+    })
+    .catch((error) => {
+      console.error('Failed to save mute settings:', error);
+    });
+};
+
+const switchCSMsgToggle = async () => {
+  const originalValue = interactive.value;
+  interactive.value = !originalValue;
+  try {
+    const userId = "placeholder_user_id"; // Should be fetched from bridge
+    const params = {
+      data: {
+        channelName: isToshiba.value ? 'TSmartLife' : 'MSmartHome',
+        uidEmailPhone: userId,
+        consentMgmtList: [
+          {
+            contactMethod: 'Interactive_Message_Permission',
+            consented: interactive.value ? 1 : 0,
+          },
+        ],
+      },
+    };
+    const res = await requestWrapper({
+      url: `${dataCenterUrl}/userCenterExternalApi/userConsentMgmt`,
+      method: "post",
+      params,
+    });
+    console.log(res.data, 'switchCSMsgToggle');
+  } catch (error) {
+    console.error('switchCSMsgToggle error', error);
+    interactive.value = originalValue;
+    // In a real app, you'd show a toast here: this.$bridge.toast(...)
+  }
+};
+
+const switchMarket = async () => {
+  const originalValue = marketing.value;
+  marketing.value = !originalValue;
+  try {
+    const userId = "placeholder_user_id"; // Should be fetched from bridge
+    const params = {
+      data: {
+        channelName: isToshiba.value ? 'TSmartLife' : 'MSmartHome',
+        uidEmailPhone: userId,
+        consentMgmtList: [
+          {
+            contactMethod: 'InApp_Permission',
+            consented: marketing.value ? 1 : 0,
+          },
+        ],
+      },
+    };
+    const res = await requestWrapper({
+      url: `${dataCenterUrl}/userCenterExternalApi/userConsentMgmt`,
+      method: "post",
+      params,
+    });
+    console.log(res.data, 'switchMarket');
+  } catch (error) {
+    console.error('switchMarket error', error);
+    marketing.value = originalValue;
+    // In a real app, you'd show a toast here: this.$bridge.toast(...)
+  }
+};
+
+onMounted(() => {
+  if (route.query.tab === 'settings') {
+    activeTab.value = 'settings';
+  }
+  fetchUnreadCounts();
+  fetchSettings();
 });
 </script>
 
@@ -87,7 +300,7 @@ const unreadCounts = ref({
       <!-- Message Center Content -->
       <div v-if="activeTab === 'center'">
         <div class="category-list">
-          <div class="category-item" @click="router.push({ path: '/system', query: { title: 'Marketing Messages' } })">
+          <div class="category-item" @click="router.push({ path: '/message-list', query: { form: 'CCS-MKT' } })">
             <div class="category-icon-wrapper" :style="{ background: useDemoIcons ? '#00D1FF' : 'transparent' }">
               <Bell v-if="useDemoIcons" :size="20" />
               <img v-else :src="'/bell.png'" style="width: 40px; height: 40px;" />
@@ -95,11 +308,11 @@ const unreadCounts = ref({
             <div class="category-info">
               <div class="category-name">Marketing Messages</div>
             </div>
-            <div v-if="unreadCounts.system > 0" class="unread-badge">{{ unreadCounts.system }}</div>
+            <div v-if="unreadCounts.marketing > 0" class="unread-badge">{{ unreadCounts.marketing }}</div>
             <ChevronRight v-if="useDemoIcons" :size="20" color="#CCC" />
             <img v-else :src="'/chevron-right.png'" style="width: 20px; height: 20px;" />
           </div>
-          <div class="category-item" @click="router.push('/activity')">
+          <div class="category-item" @click="router.push({ path: '/message-list', query: { form: 'CCS-PROC' } })">
             <div class="category-icon-wrapper" :style="{ background: useDemoIcons ? '#00C9C8' : 'transparent' }">
               <Flag v-if="useDemoIcons" :size="20" />
               <img v-else :src="'/flag.png'" style="width: 40px; height: 40px;" />
@@ -111,7 +324,7 @@ const unreadCounts = ref({
             <ChevronRight v-if="useDemoIcons" :size="20" color="#CCC" />
             <img v-else :src="'/chevron-right.png'" style="width: 20px; height: 20px;" />
           </div>
-          <div class="category-item" @click="router.push({ path: '/system', query: { title: 'Interactive Message' } })">
+          <div class="category-item" @click="router.push({ path: '/message-list', query: { form: 'CCS-SVY' } })">
             <div class="category-icon-wrapper" :style="{ background: useDemoIcons ? '#00A9A5' : 'transparent' }">
               <MessageSquare v-if="useDemoIcons" :size="20" />
               <img v-else :src="'/message-square.png'" style="width: 40px; height: 40px;" />
@@ -125,8 +338,6 @@ const unreadCounts = ref({
           </div>
         </div>
       </div>
-
-      <!-- Message Settings Content -->
       <div v-else>
         <div class="card">
           <div class="card-item">
@@ -145,7 +356,7 @@ const unreadCounts = ref({
           <div class="card">
             <div class="card-item">
               <div class="card-item-title">Do Not Disturb during Set Time</div>
-              <div :class="['switch', { active: dndEnabled }]" @click="dndEnabled = !dndEnabled">
+              <div :class="['switch', { active: dndEnabled }]" @click="dndEnabled = !dndEnabled; saveMuteSettings()">
                 <div class="switch-handle" />
               </div>
             </div>
@@ -161,7 +372,7 @@ const unreadCounts = ref({
               <div class="card-item" style="cursor: pointer" @click="openTimePicker('Ends')">
                 <div class="card-item-title">Ends</div>
                 <div style="display: flex; align-items: center; gap: 4px; color: #999">
-                  Next day {{ endTime }} 
+                  {{ isNextDay ? 'Next day ' : '' }}{{ endTime }} 
                   <ChevronRight v-if="useDemoIcons" :size="16" />
                   <img v-else src="https://ais-dev-h4jglydwyiqxmmllrevn26-622377507127.europe-west2.run.app/input_file_0.png" style="width: 16px; height: 16px;" />
                 </div>
@@ -176,7 +387,7 @@ const unreadCounts = ref({
                 <div class="card-item-title">Marketing Messages</div>
                 <div class="card-item-desc">Receive system notifications</div>
               </div>
-              <div :class="['switch', { active: marketing }]" @click="marketing = !marketing">
+              <div :class="['switch', { active: marketing }]" @click="switchMarket">
                 <div class="switch-handle" />
               </div>
             </div>
@@ -185,7 +396,7 @@ const unreadCounts = ref({
                 <div class="card-item-title">Interactive Message</div>
                 <div class="card-item-desc">Receive product interaction messages</div>
               </div>
-              <div :class="['switch', { active: interactive }]" @click="interactive = !interactive">
+              <div :class="['switch', { active: interactive }]" @click="switchCSMsgToggle">
                 <div class="switch-handle" />
               </div>
             </div>

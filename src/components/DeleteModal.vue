@@ -12,11 +12,14 @@ const emit = defineEmits(['close', 'confirm']);
   <div v-if="show" class="modal-overlay" @click="emit('close')">
     <div class="modal-content" @click.stop>
       <div class="modal-body">
-        <div style="text-align: center; color: #999; padding: 10px 0">Are you sure to delete the selected message(s)?</div>
+        <div class="modal-title">Are you sure to delete the selected message(s)?</div>
       </div>
-      <div class="modal-footer">
-        <button class="modal-btn modal-btn-cancel" @click="emit('close')">Cancel</button>
-        <button class="modal-btn modal-btn-confirm" @click="emit('confirm')">Delete</button>
+      <div class="modal-action-item delete" @click="emit('confirm')">
+        Delete
+      </div>
+      <div class="modal-divider"></div>
+      <div class="modal-action-item cancel" @click="emit('close')">
+        Cancel
       </div>
     </div>
   </div>
@@ -33,43 +36,59 @@ const emit = defineEmits(['close', 'confirm']);
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  z-index: 100;
+  z-index: 1000;
 }
 
 .modal-content {
-  background: white;
+  background: #F8F8F8;
   width: 100%;
-  max-width: 375px;
-  border-radius: 20px 20px 0 0;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  border-radius: 24px 24px 0 0;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  animation: slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .modal-body {
-  padding: 20px;
-}
-
-.modal-footer {
-  display: flex;
-  border-top: 1px solid var(--border);
-}
-
-.modal-btn {
-  flex: 1;
-  padding: 16px;
+  padding: 20px 16px;
+  background: white;
   text-align: center;
-  font-size: 16px;
+  border-bottom: 1px solid #F0F0F0;
+}
+
+.modal-title {
+  font-size: 14px;
+  color: #999;
+  line-height: 1.4;
+}
+
+.modal-action-item {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  background: white;
   cursor: pointer;
-  border: none;
-  background: none;
 }
 
-.modal-btn-cancel {
-  color: var(--text-dark);
-  border-right: 1px solid var(--border);
+.modal-action-item.delete {
+  color: #FF3B30;
 }
 
-.modal-btn-confirm {
-  color: var(--danger);
-  font-weight: 600;
+.modal-action-item.cancel {
+  color: #333;
+}
+
+.modal-divider {
+  height: 8px;
+  background: #F8F8F8;
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 </style>

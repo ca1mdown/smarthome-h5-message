@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import MessageNotification from '../views/MessageNotification.vue';
-import ActivityList from '../views/ActivityList.vue';
-import SystemMessages from '../views/SystemMessages.vue';
+import MessageList from '../views/MessageList.vue';
 import Detail from '../views/Detail.vue';
 
 const routes = [
@@ -9,8 +8,7 @@ const routes = [
   { path: '/notification', component: MessageNotification },
   { path: '/settings', redirect: '/notification' },
   { path: '/center', redirect: '/notification' },
-  { path: '/activity', component: ActivityList },
-  { path: '/system', component: SystemMessages },
+  { path: '/message-list', component: MessageList },
   { path: '/detail', component: Detail },
 ];
 

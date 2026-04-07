@@ -14,7 +14,7 @@
 :root {
   --primary: #00A9A5;
   --primary-light: rgba(0, 169, 165, 0.1);
-  --bg-gray: #f5f6f7;
+  --bg-gray: #F8F8F8;
   --text-dark: #1A1A1A;
   --text-medium: #666666;
   --text-light: #999999;
