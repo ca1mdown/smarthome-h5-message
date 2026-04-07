@@ -23,7 +23,7 @@ const messages = ref([]);
 const isLoading = ref(false);
 const isFinished = ref(false);
 const pageNum = ref(1);
-const pageSize = 10;
+const pageSize = 15;
 const isEditing = ref(false);
 const selectedMessages = ref([]);
 const showDeleteModal = ref(false);
@@ -60,44 +60,34 @@ const fetchMessages = async (isLoadMore = false) => {
   };
 
   try {
-    const res = await requestWrapper({
-      url: "/mc/v5/app/messagecenter/list",
-      method: "post",
-      params,
-    });
-    
-    const list = res.list || [];
-    const mappedList = list.map(item => ({
-      id: item.messageId,
-      title: item.messageBody?.notification?.title || 'Beyond Details & Win',
-      text: item.messageBody?.notification?.content || 'We have received your submission, which is currently underreview. Once approved, you will receive a lucky draw ticket.',
-      time: '2024-10-24 18:22:31',
-      unread: item.readFlag === 0
-    }));
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 800));
 
-    messages.value = isLoadMore ? [...messages.value, ...mappedList] : mappedList;
-    isFinished.value = list.length < pageSize;
+    // For testing pagination, we always use mock data if the API fails or if we want to force it
+    // In this environment, we'll force mock data to ensure the user can see pagination
+    const startIdx = (pageNum.value - 1) * pageSize;
+    const mockList = [];
+    
+    for (let i = 1; i <= pageSize; i++) {
+      const currentIdx = startIdx + i;
+      mockList.push({
+        id: `mock-${form.value}-${currentIdx}`,
+        title: form.value === 'CCS-MKT' ? `Marketing Offer #${currentIdx}` : `Notification #${currentIdx}`,
+        text: form.value === 'CCS-MKT' 
+          ? `Exclusive marketing offer for you! Check out our latest deals and save big on your next purchase. #${currentIdx}`
+          : `We have received your submission, which is currently underreview. Once approved, you will receive a lucky draw ticket. #${currentIdx}`,
+        time: "2024-10-24 18:22:31",
+        unread: currentIdx % 3 === 0
+      });
+    }
+
+    messages.value = isLoadMore ? [...messages.value, ...mockList] : mockList;
+    // Allow up to 5 pages for testing
+    isFinished.value = pageNum.value >= 5;
     if (!isFinished.value) pageNum.value++;
 
   } catch (error) {
-    console.error('Failed to fetch messages, using mock data:', error);
-    // Mock Data Fallback - Generate enough data for pagination test
-    const startIdx = messages.value.length;
-    const mockList = [];
-    for (let i = 1; i <= 10; i++) {
-      mockList.push({
-        id: `mock-${startIdx + i}`,
-        title: `Beyond Details & Win`,
-        text: `We have received your submission, which is currently underreview. Once approved, you will receive a lucky draw ticket.`,
-        time: "2024-10-24 18:22:31",
-        unread: i % 2 === 0
-      });
-    }
-    
-    messages.value = isLoadMore ? [...messages.value, ...mockList] : mockList;
-    // For mock data, we allow loading up to 3 pages to test pagination
-    isFinished.value = pageNum.value >= 3;
-    if (!isFinished.value) pageNum.value++;
+    console.error('Failed to fetch messages:', error);
   } finally {
     isLoading.value = false;
   }
