@@ -206,7 +206,7 @@ const useDemoIcons = true;
     </div>
 
     <!-- Content -->
-    <div class="content" :style="{ paddingBottom: isEditing ? '120px' : (isActivityLayout ? '16px' : '0') }" @scroll="handleScroll">
+    <div class="content" :style="{ paddingBottom: isEditing ? '120px' : '16px' }" @scroll="handleScroll">
       
       <!-- Message List -->
       <template v-if="messages.length > 0">
@@ -367,6 +367,7 @@ const useDemoIcons = true;
 }
 
 .view-container.system-layout .content {
+  display: block;
   margin: 0;
   background: transparent;
   border-radius: 0;
