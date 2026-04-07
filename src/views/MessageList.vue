@@ -174,7 +174,7 @@ const useDemoIcons = true;
   <div class="view-container">
     <!-- Header -->
     <div class="header">
-      <div class="header-back" @click="router.push('/notification')">
+      <div class="header-back" @click="router.back()">
         <ChevronLeft v-if="useDemoIcons" :size="24" />
         <img v-else :src="placeholderIcon" style="width: 24px; height: 24px;" />
       </div>
@@ -328,6 +328,8 @@ const useDemoIcons = true;
 }
 
 .header {
+  position: sticky;
+  top: 0;
   padding: 12px 16px;
   padding-top: calc(12px + env(safe-area-inset-top, 0px));
   display: flex;
@@ -667,16 +669,13 @@ const useDemoIcons = true;
 
 /* Edit Footer */
 .edit-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
   background: white;
   border-top: 1px solid #EEE;
   display: flex;
   flex-direction: column;
   z-index: 100;
   padding-bottom: env(safe-area-inset-bottom, 0px);
+  flex-shrink: 0;
 }
 
 .edit-actions {

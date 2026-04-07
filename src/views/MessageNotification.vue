@@ -285,11 +285,12 @@ onMounted(() => {
 <template>
   <div class="view-container">
     <div class="header">
-      <div class="header-back">
+      <div class="header-back" @click="router.back()">
         <ChevronLeft v-if="useDemoIcons" :size="24" />
         <img v-else :src="placeholderIcon" style="width: 24px; height: 24px;" />
       </div>
       <div class="header-title">Message Notification</div>
+      <div class="header-right"></div>
     </div>
     <div v-if="showSettingsTab" class="tabs">
       <div :class="['tab-item', { active: activeTab === 'center' }]" @click="activeTab = 'center'">Message Center</div>
@@ -437,10 +438,13 @@ onMounted(() => {
 }
 
 .header {
+  position: sticky;
+  top: 0;
   padding: 12px 16px;
   padding-top: calc(12px + env(safe-area-inset-top, 0px));
   display: flex;
   align-items: center;
+  justify-content: space-between;
   background: var(--bg-gray);
   z-index: 100;
   width: 100%;
@@ -448,11 +452,11 @@ onMounted(() => {
 }
 
 .header-back {
-  width: 24px;
-  height: 24px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   cursor: pointer;
 }
 
@@ -461,10 +465,20 @@ onMounted(() => {
   text-align: center;
   font-size: 18px;
   font-weight: 600;
-  margin-right: 24px;
+  color: #000;
+}
+
+.header-right {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .tabs {
+  position: sticky;
+  top: 48px; /* Height of header approximately */
   display: flex;
   justify-content: space-around;
   padding: 8px 16px;

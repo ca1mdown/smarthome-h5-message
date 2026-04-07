@@ -29,15 +29,19 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-body {
+html, body {
   margin: 0;
   padding: 0;
+  height: 100%;
+  overflow: hidden;
   background-color: var(--bg-gray);
   color: var(--text-dark);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 14px;
   line-height: 1.5;
-  min-height: 100vh;
+}
+
+body {
   /* Support for safe areas */
   padding-bottom: env(safe-area-inset-bottom);
   padding-left: env(safe-area-inset-left);
@@ -47,13 +51,13 @@ body {
 
 <style scoped>
 .app-container {
-  max-width: 375px;
-  margin: 0 auto;
-  min-height: 100vh;
-  min-height: -webkit-fill-available;
+  width: 100%;
+  height: 100vh;
+  height: -webkit-fill-available;
   background-color: var(--bg-gray);
   position: relative;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 </style>

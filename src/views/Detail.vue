@@ -17,6 +17,7 @@ const useDemoIcons = true;
         <img v-else :src="placeholderIcon" style="width: 24px; height: 24px;" />
       </div>
       <div class="header-title">Beyond Details & Win</div>
+      <div class="header-right"></div>
     </div>
     <div class="content">
       <div class="detail-view">
@@ -43,10 +44,13 @@ const useDemoIcons = true;
 }
 
 .header {
+  position: sticky;
+  top: 0;
   padding: 12px 16px;
   padding-top: calc(12px + env(safe-area-inset-top, 0px));
   display: flex;
   align-items: center;
+  justify-content: space-between;
   background: var(--bg-gray);
   z-index: 100;
   width: 100%;
@@ -54,11 +58,11 @@ const useDemoIcons = true;
 }
 
 .header-back {
-  width: 24px;
-  height: 24px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   cursor: pointer;
 }
 
@@ -67,7 +71,15 @@ const useDemoIcons = true;
   text-align: center;
   font-size: 18px;
   font-weight: 600;
-  margin-right: 24px;
+  color: #000;
+}
+
+.header-right {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .content {
