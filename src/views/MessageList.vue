@@ -367,14 +367,14 @@ const useDemoIcons = true;
 }
 
 .view-container.system-layout .content {
-  margin: 0 16px 20px 16px;
-  background: var(--card-bg);
-  border-radius: 20px;
+  margin: 0;
+  background: transparent;
+  border-radius: 0;
   overflow-y: auto;
-  padding: 0;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 16px 16px 16px;
   flex: 1;
-  /* Fix for border-radius clipping on some devices */
-  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  min-height: 0;
 }
 
 .view-container.system-layout .system-list-header {
@@ -386,8 +386,9 @@ const useDemoIcons = true;
 }
 
 .view-container.system-layout .card {
-  background: transparent;
-  border-radius: 0;
+  background: var(--card-bg);
+  border-radius: 20px;
+  overflow: hidden;
 }
 
 .content {
@@ -396,6 +397,8 @@ const useDemoIcons = true;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
 }
 
 .section-title {
