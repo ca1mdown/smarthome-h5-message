@@ -35,16 +35,18 @@ const emit = defineEmits(['close', 'confirm']);
   background: rgba(0,0,0,0.4);
   display: flex;
   align-items: flex-end;
-  justify-content: center;
   z-index: 1000;
 }
 
 .modal-content {
-  background: #F8F8F8;
+  background: white;
   width: 100%;
-  border-radius: 24px 24px 0 0;
-  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  border-radius: 20px 20px 0 0;
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
   animation: slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-body {

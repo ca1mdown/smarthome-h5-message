@@ -694,7 +694,7 @@ const useDemoIcons = true;
   display: flex;
   flex-direction: column;
   z-index: 100;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
   flex-shrink: 0;
 }
 
