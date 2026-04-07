@@ -171,7 +171,7 @@ const useDemoIcons = true;
 </script>
 
 <template>
-  <div class="view-container">
+  <div :class="['view-container', { 'system-layout': !isActivityLayout }]">
     <!-- Header -->
     <div class="header">
       <div class="header-back" @click="router.back()">
@@ -187,27 +187,27 @@ const useDemoIcons = true;
       </div>
     </div>
 
-    <!-- Content -->
-    <div class="content" :style="{ paddingBottom: isEditing ? '120px' : '16px' }" @scroll="handleScroll">
-      
-      <!-- List Header (Only for System Layout) -->
-      <div v-if="!isActivityLayout" class="system-list-header">
-        <div class="section-title">{{ pageTitle }}</div>
-        <div class="header-actions">
-          <div v-if="isEditing" class="select-all" @click="selectAll">
-            Select all 
-            <div :class="['checkbox', { checked: selectedMessages.length === messages.length && messages.length > 0 }]">
-              <Check v-if="useDemoIcons" :size="14" color="white" />
-              <img v-else :src="placeholderIcon" class="icon-small" />
-            </div>
-          </div>
-          <div v-if="!isEditing" class="edit-btn" @click="isEditing = true">
-            <Trash2 v-if="useDemoIcons" :size="22" />
-            <img v-else :src="placeholderIcon" class="icon-medium" />
+    <!-- List Header (Fixed, outside scroll area) -->
+    <div v-if="!isActivityLayout" class="system-list-header">
+      <div class="section-title">{{ pageTitle }}</div>
+      <div class="header-actions">
+        <div v-if="isEditing" class="select-all" @click="selectAll">
+          Select all 
+          <div :class="['checkbox', { checked: selectedMessages.length === messages.length && messages.length > 0 }]">
+            <Check v-if="useDemoIcons" :size="14" color="white" />
+            <img v-else :src="placeholderIcon" class="icon-small" />
           </div>
         </div>
+        <div v-if="!isEditing" class="edit-btn" @click="isEditing = true">
+          <Trash2 v-if="useDemoIcons" :size="22" />
+          <img v-else :src="placeholderIcon" class="icon-medium" />
+        </div>
       </div>
+    </div>
 
+    <!-- Content -->
+    <div class="content" :style="{ paddingBottom: isEditing ? '120px' : (isActivityLayout ? '16px' : '0') }" @scroll="handleScroll">
+      
       <!-- Message List -->
       <template v-if="messages.length > 0">
         
@@ -366,6 +366,30 @@ const useDemoIcons = true;
   justify-content: flex-end;
 }
 
+.view-container.system-layout .content {
+  margin: 0 16px 20px 16px;
+  background: var(--card-bg);
+  border-radius: 20px;
+  overflow-y: auto;
+  padding: 0;
+  flex: 1;
+  /* Fix for border-radius clipping on some devices */
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+}
+
+.view-container.system-layout .system-list-header {
+  padding: 12px 16px 16px 16px;
+}
+
+.view-container.system-layout .system-msg-item {
+  padding: 12px 16px;
+}
+
+.view-container.system-layout .card {
+  background: transparent;
+  border-radius: 0;
+}
+
 .content {
   flex: 1;
   padding: 16px;
@@ -464,10 +488,12 @@ const useDemoIcons = true;
 
 /* System Message Styles */
 .system-list-header {
-  padding: 0 0 16px 0;
+  padding: 12px 16px 16px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: var(--bg-gray);
+  flex-shrink: 0;
 }
 
 .header-actions {
