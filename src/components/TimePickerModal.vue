@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch, defineProps, defineEmits } from 'vue';
 import { TimePicker } from 'vant';
+import { TEXT } from '../constants/text';
 
 const props = defineProps({
   show: Boolean,
@@ -36,8 +37,8 @@ const onConfirmTime = () => {
         />
       </div>
       <div class="modal-footer">
-        <button class="modal-btn modal-btn-cancel" @click="emit('close')">Cancel</button>
-        <button class="modal-btn modal-btn-confirm" @click="onConfirmTime">Save</button>
+        <button class="modal-btn modal-btn-cancel" @click="emit('close')">{{ TEXT.modal_cancel }}</button>
+        <button class="modal-btn modal-btn-confirm" @click="onConfirmTime">{{ TEXT.modal_save }}</button>
       </div>
     </div>
   </div>
@@ -60,7 +61,7 @@ const onConfirmTime = () => {
   background: white;
   width: 100%;
   border-radius: 20px 20px 0 0;
-  padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 16px);
   animation: slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   display: flex;

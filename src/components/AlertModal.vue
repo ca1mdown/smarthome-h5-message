@@ -1,5 +1,6 @@
 <script setup>
 import { defineProps, defineEmits } from 'vue';
+import { TEXT } from '../constants/text';
 
 const props = defineProps({
   show: Boolean
@@ -15,15 +16,15 @@ const downloadApp = () => {
 <template>
   <div v-if="show" class="modal-overlay" @click="emit('close')">
     <div class="modal-content" @click.stop>
-      <div class="alert-header">Failed</div>
+      <div class="alert-header">{{ TEXT.revamp_sr_service_failed }}</div>
       <div class="alert-body">
-        1.Failed to open. It is recommended to delete the home screen shortcut and clear the current browser cache, then re-add the app to the home screen and try to open it again.<br/><br/>
-        2.If it still cannot be opened, it is recommended to download the APP, which will push messages faster and more stably.
+        {{ TEXT.NMessage_failed1 }}<br/><br/>
+        {{ TEXT.NMessage_failed2 }}
       </div>
       <div class="alert-footer">
-        <button class="alert-btn" @click="downloadApp">Download APP</button>
+        <button class="alert-btn" @click="downloadApp">{{ TEXT.ems_download_app_button }}</button>
         <div class="divider"></div>
-        <button class="alert-btn alert-btn-secondary" @click="emit('close')">I know</button>
+        <button class="alert-btn alert-btn-secondary" @click="emit('close')">{{ TEXT.getit }}</button>
       </div>
     </div>
   </div>
@@ -38,27 +39,31 @@ const downloadApp = () => {
   bottom: 0;
   background: rgba(0,0,0,0.4);
   display: flex;
-  align-items: flex-end;
+  align-items: center;
+  justify-content: center;
   z-index: 2000;
+  padding: 20px;
 }
 
 .modal-content {
   background: white;
   width: 100%;
-  border-radius: 20px 20px 0 0;
-  padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
-  animation: slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  max-width: 300px;
+  border-radius: 20px;
+  animation: scale-in 0.2s ease-out;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
-@keyframes slide-up {
+@keyframes scale-in {
   from {
-    transform: translateY(100%);
+    transform: scale(0.9);
+    opacity: 0;
   }
   to {
-    transform: translateY(0);
+    transform: scale(1);
+    opacity: 1;
   }
 }
 
@@ -67,43 +72,48 @@ const downloadApp = () => {
   text-align: center;
   font-size: 18px;
   font-weight: 600;
+  color: #000;
 }
 
 .alert-body {
   padding: 0 24px 24px;
   font-size: 14px;
-  color: var(--text-dark);
-  line-height: 1.6;
-  text-align: center;
+  color: #333;
+  line-height: 1.5;
+  text-align: left;
 }
 
 .alert-footer {
   display: flex;
   flex-direction: column;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid #EEE;
 }
 
 .alert-btn {
-  height: 56px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--primary);
+  font-size: 17px;
+  font-weight: 500;
+  color: #00A9A5; /* Theme primary color */
   cursor: pointer;
   border: none;
   background: none;
+  width: 100%;
+}
+
+.alert-btn:active {
+  background-color: #F9F9F9;
 }
 
 .divider {
   height: 1px;
-  background: var(--border);
-  margin: 0 16px;
+  background: #EEE;
+  width: 100%;
 }
 
 .alert-btn-secondary {
-  color: var(--text-medium);
-  font-weight: 400;
+  /* Same as primary in the screenshot */
 }
 </style>

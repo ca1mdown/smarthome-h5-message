@@ -1,8 +1,15 @@
 <script setup>
 import { defineProps, defineEmits } from 'vue';
+import { TEXT } from '../constants/text';
 
 const props = defineProps({
-  show: Boolean
+  show: Boolean,
+  title: String,
+  confirmText: String,
+  isDelete: {
+    type: Boolean,
+    default: true
+  }
 });
 
 const emit = defineEmits(['close', 'confirm']);
@@ -12,14 +19,14 @@ const emit = defineEmits(['close', 'confirm']);
   <div v-if="show" class="modal-overlay" @click="emit('close')">
     <div class="modal-content" @click.stop>
       <div class="modal-body">
-        <div class="modal-title">Are you sure to delete the selected message(s)?</div>
+        <div class="modal-title">{{ title || TEXT.messagecenter_clearSceneMsg }}</div>
       </div>
-      <div class="modal-action-item delete" @click="emit('confirm')">
-        Delete
+      <div :class="['modal-action-item', { 'delete': isDelete }]" @click="emit('confirm')">
+        {{ confirmText || (isDelete ? '删除' : '确定') }}
       </div>
       <div class="modal-divider"></div>
       <div class="modal-action-item cancel" @click="emit('close')">
-        Cancel
+        {{ TEXT.common_ui_cancel }}
       </div>
     </div>
   </div>

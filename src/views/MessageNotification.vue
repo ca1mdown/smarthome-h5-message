@@ -6,6 +6,7 @@ import requestWrapper from '../utils/request';
 import { serviceTypes } from '../constants/serviceTypes';
 import AlertModal from '../components/AlertModal.vue';
 import TimePickerModal from '../components/TimePickerModal.vue';
+import { TEXT } from '../constants/text';
 
 const router = useRouter();
 const route = useRoute();
@@ -19,7 +20,7 @@ onMounted(() => {
 });
 
 // Settings State
-const pushEnabled = ref(true);
+const pushEnabled = ref(false);
 const dndEnabled = ref(false);
 const marketing = ref(false);
 const interactive = ref(false);
@@ -31,7 +32,7 @@ const dataCenterUrl = ""; // To be supplemented by user
 // Modal State
 const showAlert = ref(false);
 const showTimePicker = ref(false);
-const timePickerType = ref('Starts');
+const timePickerType = ref(TEXT.setting_starts);
 const initialTime = ref('00:00');
 
 const isNextDay = computed(() => {
@@ -49,7 +50,7 @@ const togglePush = () => {
 
 const openTimePicker = (type) => {
   timePickerType.value = type;
-  initialTime.value = type === 'Starts' ? startTime.value : endTime.value;
+  initialTime.value = type === TEXT.setting_starts ? startTime.value : endTime.value;
   showTimePicker.value = true;
 };
 
@@ -286,15 +287,15 @@ onMounted(() => {
   <div class="view-container">
     <div class="header">
       <div class="header-back" @click="router.back()">
-        <ChevronLeft v-if="useDemoIcons" :size="24" />
-        <img v-else :src="placeholderIcon" style="width: 24px; height: 24px;" />
+        <ChevronLeft v-if="useDemoIcons" :size="24" class="chevron-icon" />
+        <img v-else :src="placeholderIcon" style="width: 24px; height: 24px;" class="chevron-icon" />
       </div>
-      <div class="header-title">Message Notification</div>
+      <div class="header-title">{{ TEXT.helpcenter_problem_messageNotification }}</div>
       <div class="header-right"></div>
     </div>
     <div v-if="showSettingsTab" class="tabs">
-      <div :class="['tab-item', { active: activeTab === 'center' }]" @click="activeTab = 'center'">Message Center</div>
-      <div :class="['tab-item', { active: activeTab === 'settings' }]" @click="activeTab = 'settings'">Message Settings</div>
+      <div :class="['tab-item', { active: activeTab === 'center' }]" @click="activeTab = 'center'">{{ TEXT.messagecenter_title }}</div>
+      <div :class="['tab-item', { active: activeTab === 'settings' }]" @click="activeTab = 'settings'">{{ TEXT.messagecenter_msgSettings }}</div>
     </div>
 
     <div class="content">
@@ -307,11 +308,11 @@ onMounted(() => {
               <img v-else :src="'/bell.png'" style="width: 40px; height: 40px;" />
             </div>
             <div class="category-info">
-              <div class="category-name">Marketing Messages</div>
+              <div class="category-name">{{ TEXT.messagecenter_markMessages }}</div>
             </div>
             <div v-if="unreadCounts.marketing > 0" class="unread-badge">{{ unreadCounts.marketing }}</div>
-            <ChevronRight v-if="useDemoIcons" :size="20" color="#CCC" />
-            <img v-else :src="'/chevron-right.png'" style="width: 20px; height: 20px;" />
+            <ChevronRight v-if="useDemoIcons" :size="20" color="#CCC" class="chevron-icon" />
+            <img v-else :src="'/chevron-right.png'" style="width: 20px; height: 20px;" class="chevron-icon" />
           </div>
           <div class="category-item" @click="router.push({ path: '/message-list', query: { form: 'CCS-PROC' } })">
             <div class="category-icon-wrapper" :style="{ background: useDemoIcons ? '#00C9C8' : 'transparent' }">
@@ -319,11 +320,11 @@ onMounted(() => {
               <img v-else :src="'/flag.png'" style="width: 40px; height: 40px;" />
             </div>
             <div class="category-info">
-              <div class="category-name">Activity Notification</div>
+              <div class="category-name">{{ TEXT.messagecenter_activity_message }}</div>
             </div>
             <div v-if="unreadCounts.activity > 0" class="unread-badge">{{ unreadCounts.activity }}</div>
-            <ChevronRight v-if="useDemoIcons" :size="20" color="#CCC" />
-            <img v-else :src="'/chevron-right.png'" style="width: 20px; height: 20px;" />
+            <ChevronRight v-if="useDemoIcons" :size="20" color="#CCC" class="chevron-icon" />
+            <img v-else :src="'/chevron-right.png'" style="width: 20px; height: 20px;" class="chevron-icon" />
           </div>
           <div class="category-item" @click="router.push({ path: '/message-list', query: { form: 'CCS-SVY' } })">
             <div class="category-icon-wrapper" :style="{ background: useDemoIcons ? '#00A9A5' : 'transparent' }">
@@ -331,11 +332,11 @@ onMounted(() => {
               <img v-else :src="'/message-square.png'" style="width: 40px; height: 40px;" />
             </div>
             <div class="category-info">
-              <div class="category-name">Interactive Message</div>
+              <div class="category-name">{{ TEXT.research_msg }}</div>
             </div>
             <div v-if="unreadCounts.interactive > 0" class="unread-badge">{{ unreadCounts.interactive }}</div>
-            <ChevronRight v-if="useDemoIcons" :size="20" color="#CCC" />
-            <img v-else :src="'/chevron-right.png'" style="width: 20px; height: 20px;" />
+            <ChevronRight v-if="useDemoIcons" :size="20" color="#CCC" class="chevron-icon" />
+            <img v-else :src="'/chevron-right.png'" style="width: 20px; height: 20px;" class="chevron-icon" />
           </div>
         </div>
       </div>
@@ -343,50 +344,53 @@ onMounted(() => {
         <div class="card">
           <div class="card-item">
             <div class="card-item-left">
-              <div class="card-item-title">Push Notifications</div>
-              <div class="card-item-desc">Enable "Push Notifications" to receive notifications in real time.</div>
+              <div class="card-item-title">{{ TEXT.allow_notification }}</div>
+              <div class="card-item-desc">{{ TEXT.NMessage_setting }}</div>
             </div>
-            <button :class="pushEnabled ? 'btn-enabled' : 'btn-enable'" @click="togglePush">
-              {{ pushEnabled ? "Enabled" : "Enable" }}
+            <button v-if="!pushEnabled" class="btn-enable" @click="togglePush">
+              {{ TEXT.common_ui_turn_on }}
             </button>
+            <div v-else class="btn-enabled">
+              {{ TEXT.common_ui_on }}
+            </div>
           </div>
         </div>
 
         <div :class="{ disabled: !pushEnabled }">
-          <div class="section-title">Do not disturb</div>
+          <div class="section-title">{{ TEXT.messagecenter_doNotDisturb }}</div>
           <div class="card">
             <div class="card-item">
-              <div class="card-item-title">Do Not Disturb during Set Time</div>
+              <div class="card-item-title">{{ TEXT.messagecenter_dndForTheTime }}</div>
               <div :class="['switch', { active: dndEnabled }]" @click="dndEnabled = !dndEnabled; saveMuteSettings()">
                 <div class="switch-handle" />
               </div>
             </div>
             <div v-if="dndEnabled">
-              <div class="card-item" style="cursor: pointer" @click="openTimePicker('Starts')">
-                <div class="card-item-title">Starts</div>
+              <div class="card-item" style="cursor: pointer" @click="openTimePicker(TEXT.messagecenter_msgStart)">
+                <div class="card-item-title">{{ TEXT.messagecenter_msgStart }}</div>
                 <div style="display: flex; align-items: center; gap: 4px; color: #999">
                   {{ startTime }} 
-                  <ChevronRight v-if="useDemoIcons" :size="16" />
-                  <img v-else src="https://ais-dev-h4jglydwyiqxmmllrevn26-622377507127.europe-west2.run.app/input_file_0.png" style="width: 16px; height: 16px;" />
+                  <ChevronRight v-if="useDemoIcons" :size="16" class="chevron-icon" />
+                  <img v-else src="https://ais-dev-h4jglydwyiqxmmllrevn26-622377507127.europe-west2.run.app/input_file_0.png" style="width: 16px; height: 16px;" class="chevron-icon" />
                 </div>
               </div>
-              <div class="card-item" style="cursor: pointer" @click="openTimePicker('Ends')">
-                <div class="card-item-title">Ends</div>
+              <div class="card-item" style="cursor: pointer" @click="openTimePicker(TEXT.messagecenter_msgEnd)">
+                <div class="card-item-title">{{ TEXT.messagecenter_msgEnd }}</div>
                 <div style="display: flex; align-items: center; gap: 4px; color: #999">
-                  {{ isNextDay ? 'Next day ' : '' }}{{ endTime }} 
-                  <ChevronRight v-if="useDemoIcons" :size="16" />
-                  <img v-else src="https://ais-dev-h4jglydwyiqxmmllrevn26-622377507127.europe-west2.run.app/input_file_0.png" style="width: 16px; height: 16px;" />
+                  {{ isNextDay ? TEXT.setting_next_day : '' }}{{ endTime }} 
+                  <ChevronRight v-if="useDemoIcons" :size="16" class="chevron-icon" />
+                  <img v-else src="https://ais-dev-h4jglydwyiqxmmllrevn26-622377507127.europe-west2.run.app/input_file_0.png" style="width: 16px; height: 16px;" class="chevron-icon" />
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="section-title">By message type</div>
+          <div class="section-title">{{ TEXT.noti_setting_type }}</div>
           <div class="card">
             <div class="card-item">
               <div class="card-item-left">
-                <div class="card-item-title">Marketing Messages</div>
-                <div class="card-item-desc">Receive system notifications</div>
+                <div class="card-item-title">{{ TEXT.messagecenter_markMessages }}</div>
+                <div class="card-item-desc">{{ TEXT.setting_marketing_desc }}</div>
               </div>
               <div :class="['switch', { active: marketing }]" @click="switchMarket">
                 <div class="switch-handle" />
@@ -394,8 +398,8 @@ onMounted(() => {
             </div>
             <div class="card-item">
               <div class="card-item-left">
-                <div class="card-item-title">Interactive Message</div>
-                <div class="card-item-desc">Receive product interaction messages</div>
+                <div class="card-item-title">{{ TEXT.research_msg }}</div>
+                <div class="card-item-desc">{{ TEXT.setting_interactive_desc }}</div>
               </div>
               <div :class="['switch', { active: interactive }]" @click="switchCSMsgToggle">
                 <div class="switch-handle" />
@@ -410,7 +414,7 @@ onMounted(() => {
         <Lightbulb v-if="useDemoIcons" :size="20" class="tip-icon" />
         <img v-else src="https://picsum.photos/seed/placeholder/20/20?grayscale" style="width: 20px; height: 20px;" class="tip-icon" />
         <div class="tip-text">
-          Click <span class="tip-link" @click="downloadApp">"Download App"</span> for faster and more stable message push notifications.
+          {{ TEXT.NMessage_center_bottom.split('%@')[0] }}<span class="tip-link" @click="downloadApp">"Download APP"</span>{{ TEXT.NMessage_center_bottom.split('%@')[1] }}
         </div>
       </div>
     </div>
@@ -433,6 +437,7 @@ onMounted(() => {
   flex-direction: column;
   height: 100vh;
   height: -webkit-fill-available;
+  width: 100%;
   overflow: hidden;
   background: var(--bg-gray);
 }
@@ -670,6 +675,12 @@ onMounted(() => {
   cursor: pointer;
 }
 
+.btn-on-text {
+  color: var(--text-light);
+  font-size: 14px;
+  font-weight: 400;
+}
+
 .btn-enabled {
   background: #F0F0F0;
   color: var(--text-light);
@@ -692,7 +703,7 @@ onMounted(() => {
 
 .bottom-tip {
   padding: 16px;
-  margin: auto 0 24px 0;
+  margin: 16px 0 24px 0;
   background: #E6F7F7;
   border-radius: 20px;
   display: flex;

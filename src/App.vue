@@ -1,9 +1,10 @@
 <script setup>
-// App.vue is kept clean, modals are handled within components
+import { GLOBAL_CONFIG } from './constants/config';
+const isRTL = GLOBAL_CONFIG.isRTL;
 </script>
 
 <template>
-  <div class="app-container">
+  <div :class="['app-container', { 'rtl-layout': isRTL }]" :dir="isRTL ? 'rtl' : 'ltr'">
     <router-view v-slot="{ Component }">
       <component :is="Component" />
     </router-view>
@@ -42,10 +43,50 @@ html, body {
 }
 
 body {
-  /* Support for safe areas */
-  padding-bottom: env(safe-area-inset-bottom);
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
+  /* Individual views handle safe areas if needed */
+}
+
+/* RTL Global Support */
+.rtl-layout {
+  direction: rtl;
+  text-align: right;
+}
+
+.rtl-layout .header-back {
+  transform: scaleX(-1); /* Flip back button icon */
+}
+
+/* Flip chevron icons in RTL */
+.rtl-layout .chevron-icon,
+.rtl-layout .lucide-chevron-right,
+.rtl-layout .lucide-chevron-left {
+  transform: scaleX(-1);
+}
+
+/* Handle margins and paddings in RTL */
+.rtl-layout [style*="margin-right"] {
+  margin-left: attr(style, "margin-right") !important;
+  margin-right: 0 !important;
+}
+
+/* Specific overrides for common classes */
+.rtl-layout .unread-badge {
+  margin-right: 0;
+  margin-left: 4px;
+}
+
+.rtl-layout .system-msg-dot.edit-mode {
+  margin-right: 0;
+  margin-left: 12px;
+}
+
+.rtl-layout .activity-card-header {
+  gap: 10px;
+}
+
+.rtl-layout .system-msg-right {
+  margin-left: 0;
+  margin-right: 8px;
 }
 </style>
 
@@ -54,7 +95,7 @@ body {
   width: 100%;
   height: 100vh;
   height: -webkit-fill-available;
-  background-color: var(--bg-gray);
+  background-color: inherit;
   position: relative;
   display: flex;
   flex-direction: column;

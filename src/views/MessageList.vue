@@ -14,6 +14,7 @@ import {
 } from 'lucide-vue-next';
 import DeleteModal from '../components/DeleteModal.vue';
 import requestWrapper from '../utils/request';
+import { TEXT } from '../constants/text';
 
 const router = useRouter();
 const route = useRoute();
@@ -27,15 +28,16 @@ const pageSize = 15;
 const isEditing = ref(false);
 const selectedMessages = ref([]);
 const showDeleteModal = ref(false);
+const showReadModal = ref(false);
 const selectedId = ref(null); // For single delete in activity mode
 
 // Route Params
 const form = computed(() => route.query.form || 'CCS-PROC');
 const pageTitle = computed(() => {
-  if (form.value === 'CCS-PROC') return 'Activity Notification';
-  if (form.value === 'CCS-MKT') return 'Marketing Messages';
-  if (form.value === 'CCS-SVY') return 'Interactive Message';
-  return 'Messages';
+  if (form.value === 'CCS-PROC') return TEXT.messagecenter_activity_message;
+  if (form.value === 'CCS-MKT') return TEXT.messagecenter_markMessages;
+  if (form.value === 'CCS-SVY') return TEXT.research_msg;
+  return TEXT.messagecenter_title;
 });
 
 // Layout Type
@@ -70,15 +72,33 @@ const fetchMessages = async (isLoadMore = false) => {
     
     for (let i = 1; i <= pageSize; i++) {
       const currentIdx = startIdx + i;
-      mockList.push({
-        id: `mock-${form.value}-${currentIdx}`,
-        title: form.value === 'CCS-MKT' ? `Marketing Offer #${currentIdx}` : `Notification #${currentIdx}`,
-        text: form.value === 'CCS-MKT' 
-          ? `Exclusive marketing offer for you! Check out our latest deals and save big on your next purchase. #${currentIdx}`
-          : `We have received your submission, which is currently underreview. Once approved, you will receive a lucky draw ticket. #${currentIdx}`,
-        time: "2024-10-24 18:22:31",
-        unread: currentIdx % 3 === 0
-      });
+      if (form.value === 'CCS-PROC') {
+        mockList.push({
+          id: `mock-proc-${currentIdx}`,
+          pushTime: "2024-10-24 18:22:31",
+          activityName: `Activity Name #${currentIdx}`,
+          title: `Activity Title #${currentIdx}`,
+          content: `We have received your submission, which is currently underreview. Once approved, you will receive a lucky draw ticket. #${currentIdx}`,
+          jumpUrl: currentIdx % 2 === 0 ? '/detail' : '',
+          detailType: 2
+        });
+      } else {
+        mockList.push({
+          id: `mock-${form.value}-${currentIdx}`,
+          icon: 'https://picsum.photos/seed/msg/40/40',
+          messageBody: {
+            notification: {
+              title: form.value === 'CCS-MKT' ? `Marketing Offer #${currentIdx}` : `Survey #${currentIdx}`,
+              content: form.value === 'CCS-MKT' 
+                ? `Exclusive marketing offer for you! Check out our latest deals and save big on your next purchase. #${currentIdx}`
+                : `Please help us improve our service by completing this short survey. #${currentIdx}`
+            }
+          },
+          readFlag: currentIdx % 3 === 0 ? 0 : 1,
+          createTimeFormat: "2024-10-24 18:22:31",
+          detailType: form.value === 'CCS-MKT' ? 0 : 1
+        });
+      }
     }
 
     messages.value = isLoadMore ? [...messages.value, ...mockList] : mockList;
@@ -133,6 +153,11 @@ const openDeleteModal = (id = null) => {
   showDeleteModal.value = true;
 };
 
+const openReadModal = () => {
+  if (selectedMessages.value.length === 0) return;
+  showReadModal.value = true;
+};
+
 const confirmDelete = () => {
   if (selectedId.value) {
     messages.value = messages.value.filter(m => m.id !== selectedId.value);
@@ -145,15 +170,30 @@ const confirmDelete = () => {
   selectedId.value = null;
 };
 
-const markAsRead = () => {
+const confirmMarkAsRead = () => {
   messages.value = messages.value.map(m => {
     if (selectedMessages.value.includes(m.id)) {
-      return { ...m, unread: false };
+      return { ...m, readFlag: 1 };
     }
     return m;
   });
   selectedMessages.value = [];
   isEditing.value = false;
+  showReadModal.value = false;
+};
+
+const goToDetail = (msg) => {
+  if (isEditing.value) {
+    toggleSelect(msg.id);
+    return;
+  }
+  router.push({
+    path: '/detail',
+    query: { 
+      id: msg.id,
+      type: msg.detailType || 0
+    }
+  });
 };
 
 const placeholderIcon = 'https://picsum.photos/seed/placeholder/24/24?grayscale';
@@ -165,8 +205,8 @@ const useDemoIcons = true;
     <!-- Header -->
     <div class="header">
       <div class="header-back" @click="router.back()">
-        <ChevronLeft v-if="useDemoIcons" :size="24" />
-        <img v-else :src="placeholderIcon" style="width: 24px; height: 24px;" />
+        <ChevronLeft v-if="useDemoIcons" :size="24" class="chevron-icon" />
+        <img v-else :src="placeholderIcon" style="width: 24px; height: 24px;" class="chevron-icon" />
       </div>
       <div class="header-title">{{ pageTitle }}</div>
       <div class="header-right">
@@ -182,7 +222,7 @@ const useDemoIcons = true;
       <div class="section-title">{{ pageTitle }}</div>
       <div class="header-actions">
         <div v-if="isEditing" class="select-all" @click="selectAll">
-          Select all 
+          {{ TEXT.select_all }} 
           <div :class="['checkbox', { checked: selectedMessages.length === messages.length && messages.length > 0 }]">
             <Check v-if="useDemoIcons" :size="14" color="white" />
             <img v-else :src="placeholderIcon" class="icon-small" />
@@ -204,27 +244,27 @@ const useDemoIcons = true;
         <!-- Activity Layout -->
         <template v-if="isActivityLayout">
           <div v-for="item in messages" :key="item.id" class="activity-item-wrapper">
-            <div class="date-header">{{ item.time }}</div>
+            <div class="date-header">{{ item.pushTime }}</div>
             <div class="activity-card">
               <div class="activity-card-header">
                 <div class="activity-card-icon">
                   <Flag v-if="useDemoIcons" :size="14" color="white" />
                   <img v-else :src="placeholderIcon" class="icon-small" />
                 </div>
-                <div class="activity-card-title">{{ item.title }}</div>
+                <div class="activity-card-title">{{ item.activityName }}</div>
                 <div class="more-btn" @click="openDeleteModal(item.id)">
                   <MoreHorizontal v-if="useDemoIcons" :size="20" color="#999" />
                   <img v-else :src="placeholderIcon" class="icon-medium" />
                 </div>
               </div>
               <div class="activity-card-body">
-                <div class="activity-card-main-title">{{ item.title }} | Thank you for your participation</div>
-                <div class="activity-card-text">{{ item.text }}</div>
+                <div class="activity-card-main-title">{{ item.title }}</div>
+                <div class="activity-card-text">{{ item.content }}</div>
               </div>
-              <div class="activity-card-footer" @click="router.push('/detail')">
-                <span>View Details</span>
-                <ChevronRight v-if="useDemoIcons" :size="16" color="#999" />
-                <img v-else :src="placeholderIcon" class="icon-small" />
+              <div v-if="item.jumpUrl" class="activity-card-footer" @click="goToDetail(item)">
+                <span>{{ TEXT.promotion_detail }}</span>
+                <ChevronRight v-if="useDemoIcons" :size="16" color="#999" class="chevron-icon" />
+                <img v-else :src="placeholderIcon" class="icon-small chevron-icon" />
               </div>
             </div>
           </div>
@@ -233,26 +273,25 @@ const useDemoIcons = true;
         <!-- System Layout -->
         <template v-else>
           <div class="card">
-            <div v-for="msg in messages" :key="msg.id" class="system-msg-item" @click="isEditing ? toggleSelect(msg.id) : router.push('/detail')">
+            <div v-for="msg in messages" :key="msg.id" class="system-msg-item" @click="goToDetail(msg)">
               <div class="system-msg-icon">
-                <Bell v-if="useDemoIcons" :size="20" color="#00D1FF" />
-                <img v-else :src="placeholderIcon" class="icon-medium" />
+                <img :src="msg.icon" class="icon-medium" />
               </div>
               <div class="system-msg-content">
                 <div class="system-msg-header">
-                  <div class="system-msg-title">{{ msg.title }}</div>
+                  <div class="system-msg-title">{{ msg.messageBody.notification.title }}</div>
                 </div>
-                <div class="system-msg-desc">{{ msg.text }}</div>
-                <div class="system-msg-time">{{ msg.time }}</div>
+                <div class="system-msg-desc">{{ msg.messageBody.notification.content }}</div>
+                <div class="system-msg-time">{{ msg.createTimeFormat }}</div>
               </div>
               <div class="system-msg-right">
-                <div v-if="msg.unread && isEditing" class="system-msg-dot edit-mode" />
+                <div v-if="msg.readFlag === 0 && isEditing" class="system-msg-dot edit-mode" />
                 <div class="checkbox-slot">
                   <div v-if="isEditing" :class="['checkbox', { checked: selectedMessages.includes(msg.id) }]">
                     <Check v-if="useDemoIcons" :size="14" color="white" />
                     <img v-else :src="placeholderIcon" class="icon-small" />
                   </div>
-                  <div v-else-if="msg.unread" class="system-msg-dot" />
+                  <div v-else-if="msg.readFlag === 0" class="system-msg-dot" />
                 </div>
               </div>
             </div>
@@ -264,7 +303,7 @@ const useDemoIcons = true;
           <div class="loading-spinner small"></div>
           <span>Loading...</span>
         </div>
-        <div v-else-if="isFinished && messages.length > 0" class="no-more">No more messages</div>
+        <div v-else-if="isFinished && messages.length > 0" class="no-more">{{ TEXT.list_no_more }}</div>
       </template>
 
       <!-- Initial Loading State -->
@@ -279,7 +318,7 @@ const useDemoIcons = true;
             <Bell v-if="useDemoIcons" :size="80" color="#F0F0F0" />
             <img v-else :src="placeholderIcon" style="width: 80px; height: 80px; opacity: 0.1" />
           </div>
-          <div class="no-message-text">No message</div>
+      <div class="no-message-text">{{ TEXT.push_messages_none }}</div>
         </div>
       </div>
     </div>
@@ -290,20 +329,37 @@ const useDemoIcons = true;
         <div class="edit-action-btn" @click="openDeleteModal()">
           <Trash2 v-if="useDemoIcons" :size="20" />
           <img v-else :src="placeholderIcon" style="width: 20px; height: 20px;" />
-          <span>Delete</span>
+          <span>{{ TEXT.list_delete }}</span>
         </div>
-        <div class="edit-action-btn" @click="markAsRead">
+        <div class="edit-action-btn" @click="openReadModal">
           <CheckCircle v-if="useDemoIcons" :size="20" />
           <img v-else :src="placeholderIcon" style="width: 20px; height: 20px;" />
-          <span>Read</span>
+          <span>{{ TEXT.list_read }}</span>
         </div>
       </div>
       <div class="footer-divider"></div>
-      <button class="cancel-btn" @click="isEditing = false">Cancel</button>
+      <button class="cancel-btn" @click="isEditing = false">{{ TEXT.common_ui_cancel }}</button>
     </div>
 
     <!-- Delete Modal -->
-    <DeleteModal :show="showDeleteModal" @close="showDeleteModal = false" @confirm="confirmDelete" />
+    <DeleteModal 
+      :show="showDeleteModal" 
+      :title="TEXT.messagecenter_clearSceneMsg"
+      :confirm-text="TEXT.list_delete"
+      :is-delete="true"
+      @close="showDeleteModal = false" 
+      @confirm="confirmDelete" 
+    />
+
+    <!-- Read Modal -->
+    <DeleteModal 
+      :show="showReadModal" 
+      :title="TEXT.msg_mark_all_as_read"
+      :confirm-text="TEXT.list_read"
+      :is-delete="false"
+      @close="showReadModal = false" 
+      @confirm="confirmMarkAsRead" 
+    />
   </div>
 </template>
 
@@ -313,6 +369,7 @@ const useDemoIcons = true;
   flex-direction: column;
   height: 100vh;
   height: -webkit-fill-available;
+  width: 100%;
   overflow: hidden;
   background: var(--bg-gray);
 }
