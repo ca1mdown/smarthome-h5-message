@@ -404,14 +404,14 @@ onMounted(() => {
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Common Bottom Tip -->
-    <div class="bottom-tip">
-      <Lightbulb v-if="useDemoIcons" :size="20" class="tip-icon" />
-      <img v-else src="https://picsum.photos/seed/placeholder/20/20?grayscale" style="width: 20px; height: 20px;" class="tip-icon" />
-      <div class="tip-text">
-        Click <span class="tip-link" @click="downloadApp">"Download App"</span> for faster and more stable message push notifications.
+      <!-- Common Bottom Tip (Now inside content to scroll) -->
+      <div class="bottom-tip">
+        <Lightbulb v-if="useDemoIcons" :size="20" class="tip-icon" />
+        <img v-else src="https://picsum.photos/seed/placeholder/20/20?grayscale" style="width: 20px; height: 20px;" class="tip-icon" />
+        <div class="tip-text">
+          Click <span class="tip-link" @click="downloadApp">"Download App"</span> for faster and more stable message push notifications.
+        </div>
       </div>
     </div>
 
@@ -692,7 +692,7 @@ onMounted(() => {
 
 .bottom-tip {
   padding: 16px;
-  margin: 0 16px 20px 16px;
+  margin: auto 0 24px 0;
   background: #E6F7F7;
   border-radius: 20px;
   display: flex;
